@@ -6,6 +6,7 @@ import { User } from "../entities/user.entity";
 import { CreateUserDto } from "../dto/create-user.dto";
 import { UpdateUserDto } from "../dto/update-user.dto";
 import { NotFoundException } from "@nestjs/common";
+import { PaginateUsersDto } from "../dto/paginate-users.dto";
 
 describe("UsersService", () => {
   let service: UsersService;
@@ -65,7 +66,7 @@ describe("UsersService", () => {
   });
 
   describe("findAll", () => {
-    it("should return an array of users", async () => {
+    it("should return an array of users with default pagination", async () => {
       const expectedUsers: User[] = [
         {
           id: 1,
@@ -87,7 +88,40 @@ describe("UsersService", () => {
 
       const result = await service.findAll();
 
-      expect(mockRepository.find).toHaveBeenCalled();
+      expect(mockRepository.find).toHaveBeenCalledWith({
+        skip: 0,
+        take: 10,
+      });
+      expect(result).toEqual(expectedUsers);
+    });
+
+    it("should return an array of users with custom pagination", async () => {
+      const paginateUsersDto: PaginateUsersDto = { page: 2, limit: 5 };
+      const expectedUsers: User[] = [
+        {
+          id: 6,
+          firstName: "Alice",
+          lastName: "Smith",
+          email: "alice@example.com",
+          password: "XXXXXXXXXXX",
+        },
+        {
+          id: 7,
+          firstName: "Bob",
+          lastName: "Johnson",
+          email: "bob@example.com",
+          password: "XXXXXXXXXXX",
+        },
+      ];
+
+      mockRepository.find.mockResolvedValue(expectedUsers);
+
+      const result = await service.findAll(paginateUsersDto);
+
+      expect(mockRepository.find).toHaveBeenCalledWith({
+        skip: 5,
+        take: 5,
+      });
       expect(result).toEqual(expectedUsers);
     });
 
@@ -98,7 +132,6 @@ describe("UsersService", () => {
       await expect(service.findAll()).rejects.toThrow("No users found");
     });
   });
-
   describe("findOne", () => {
     it("should return a user by id", async () => {
       const userId = 1;
