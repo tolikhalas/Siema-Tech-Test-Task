@@ -4,6 +4,7 @@ import { UpdateUserDto } from "./dto/update-user.dto";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { User } from "./entities/user.entity";
+import { PaginateUsersDto } from "./dto/paginate-users.dto";
 
 @Injectable()
 export class UsersService {
@@ -16,8 +17,14 @@ export class UsersService {
     return await this.usersRepository.save(createUserDto);
   }
 
-  async findAll(): Promise<User[]> {
-    const users = await this.usersRepository.find();
+  async findAll(paginateUsersDto?: PaginateUsersDto): Promise<User[]> {
+    const { page = 1, limit = 10 } = paginateUsersDto ?? {};
+    const skip = (page - 1) * limit;
+
+    const users = await this.usersRepository.find({
+      skip,
+      take: limit,
+    });
     if (users.length === 0) {
       throw new NotFoundException("No users found");
     }
