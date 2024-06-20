@@ -1,3 +1,5 @@
+# Development docker-compose.yml
+# Depend on ```source YOUR_ENV_FILE```
 version: "3.8"
 
 services:
