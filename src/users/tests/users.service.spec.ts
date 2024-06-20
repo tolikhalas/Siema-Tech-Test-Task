@@ -5,6 +5,7 @@ import { UsersService } from "../users.service";
 import { User } from "../entities/user.entity";
 import { CreateUserDto } from "../dto/create-user.dto";
 import { UpdateUserDto } from "../dto/update-user.dto";
+import { NotFoundException } from "@nestjs/common";
 
 describe("UsersService", () => {
   let service: UsersService;
@@ -89,6 +90,13 @@ describe("UsersService", () => {
       expect(mockRepository.find).toHaveBeenCalled();
       expect(result).toEqual(expectedUsers);
     });
+
+    it("should throw a NotFoundException if no users are found", async () => {
+      mockRepository.find.mockResolvedValue([]);
+
+      await expect(service.findAll()).rejects.toThrow(NotFoundException);
+      await expect(service.findAll()).rejects.toThrow("No users found");
+    });
   });
 
   describe("findOne", () => {
@@ -112,17 +120,15 @@ describe("UsersService", () => {
       expect(result).toEqual(expectedUser);
     });
 
-    it("should return undefined if user is not found", async () => {
+    it("should throw a NotFoundException if user is not found", async () => {
       const userId = 999;
 
       mockRepository.findOne.mockResolvedValue(undefined);
 
-      const result = await service.findOne(userId);
-
-      expect(mockRepository.findOne).toHaveBeenCalledWith({
-        where: { id: userId },
-      });
-      expect(result).toBeUndefined();
+      await expect(service.findOne(userId)).rejects.toThrow(NotFoundException);
+      await expect(service.findOne(userId)).rejects.toThrow(
+        `User with id[${userId}] not found`,
+      );
     });
   });
 
@@ -130,7 +136,6 @@ describe("UsersService", () => {
     it("should update a user", async () => {
       const userId = 1;
       const updateUserDto: UpdateUserDto = {
-        id: userId,
         firstName: "Jane",
         lastName: "Doe",
         email: "jane@example.com",
@@ -157,10 +162,9 @@ describe("UsersService", () => {
       expect(result).toEqual(updatedUser);
     });
 
-    it("should throw an error if user is not found", async () => {
+    it("should throw a NotFoundException if user is not found", async () => {
       const userId = 999;
       const updateUserDto: UpdateUserDto = {
-        id: userId,
         firstName: "Jane",
         lastName: "Doe",
         email: "jane@example.com",
@@ -170,7 +174,10 @@ describe("UsersService", () => {
       mockRepository.findOne.mockResolvedValue(undefined);
 
       await expect(service.update(userId, updateUserDto)).rejects.toThrow(
-        "User not found",
+        NotFoundException,
+      );
+      await expect(service.update(userId, updateUserDto)).rejects.toThrow(
+        `User with id[${userId}] not found`,
       );
     });
   });
@@ -198,12 +205,15 @@ describe("UsersService", () => {
       expect(result).toEqual(userToRemove);
     });
 
-    it("should throw an error if user is not found", async () => {
+    it("should throw a NotFoundException if user is not found", async () => {
       const userId = 999;
 
       mockRepository.findOne.mockResolvedValue(undefined);
 
-      await expect(service.remove(userId)).rejects.toThrow("User not found");
+      await expect(service.remove(userId)).rejects.toThrow(NotFoundException);
+      await expect(service.remove(userId)).rejects.toThrow(
+        `User with id[${userId}] not found`,
+      );
     });
   });
 });
