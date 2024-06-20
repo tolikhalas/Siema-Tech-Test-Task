@@ -1,0 +1,40 @@
+# Base docker-compose.yml
+# Depend on ```source YOUR_ENV_FILE```
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: .
+    image: siema-tech-backend-service
+    container_name: siema-tech-backend-service
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - siema-tech-network
+
+  # In order to use .env vars in health script below
+  # you have to run ```source YOUR_ENV_FILE```
+  db:
+    image: postgres:alpine
+    container_name: siema-tech-db
+    volumes:
+      - /var/lib/postgresql/data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - siema-tech-network
+
+networks:
+  siema-tech-network:
+    name: siema-tech-network
+    driver: bridge
