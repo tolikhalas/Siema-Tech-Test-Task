@@ -25,14 +25,7 @@ services:
     container_name: siema-tech-db
     volumes:
       - /var/lib/postgresql/data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
-    networks:
-      - siema-tech-network
+    
 
 networks:
   siema-tech-network:

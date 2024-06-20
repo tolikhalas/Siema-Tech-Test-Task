@@ -9,14 +9,20 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
+# Display environment variables
+set -a
 # Determine which environment to use
 if [ "$1" = "dev" ]; then
-  source env/.env.development.local
+  # Load environment variables from .env.development.local file
+  source .env.development.local
   docker-compose -f docker-compose.yaml -f docker-compose.dev.yaml up
 elif [ "$1" = "prod" ]; then
-  source env/.env.prod.local
+  # Load environment variables from .env.prod.local file
+  source .env.prod.local
   docker-compose -f docker-compose.yaml -f docker-compose.prod.yaml up
+elif [ "$1" = "down" ]; then
+  docker-compose down
 else
-  echo "Usage: $0 {dev|prod}"
+  echo "Usage: $0 {dev|prod|down}"
   exit 1
 fi
