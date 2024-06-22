@@ -5,6 +5,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { User } from "./entities/user.entity";
 import { PaginateUsersDto } from "./dto/paginate-users.dto";
+import { UserResponse } from "./dto/user-response.dto";
 
 @Injectable()
 export class UsersService {
@@ -13,11 +14,13 @@ export class UsersService {
     private readonly usersRepository: Repository<User>,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
-    return await this.usersRepository.save(createUserDto);
+  async create(createUserDto: CreateUserDto): Promise<UserResponse> {
+    const user = this.usersRepository.create(createUserDto);
+    await this.usersRepository.save(user);
+    return new UserResponse(user);
   }
 
-  async findAll(paginateUsersDto?: PaginateUsersDto): Promise<User[]> {
+  async findAll(paginateUsersDto?: PaginateUsersDto): Promise<UserResponse[]> {
     const { page = 1, limit = 10 } = paginateUsersDto ?? {};
     const skip = (page - 1) * limit;
 
@@ -28,31 +31,36 @@ export class UsersService {
     if (users.length === 0) {
       throw new NotFoundException("No users found");
     }
-    return users;
+    return users.map((user) => new UserResponse(user));
   }
 
-  async findOne(id: number): Promise<User | undefined> {
+  async findOne(id: number): Promise<UserResponse | undefined> {
     const user = await this.usersRepository.findOne({ where: { id } });
     if (!user) {
       throw new NotFoundException(`User with id[${id}] not found`);
     }
-    return user;
+    return new UserResponse(user);
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+  async update(
+    id: number,
+    updateUserDto: UpdateUserDto,
+  ): Promise<UserResponse> {
     const user = await this.usersRepository.findOne({ where: { id } });
     if (!user) {
       throw new NotFoundException(`User with id[${id}] not found`);
     }
     const updatedUser = { ...user, ...updateUserDto };
-    return await this.usersRepository.save(updatedUser);
+    await this.usersRepository.save(updatedUser);
+    return new UserResponse(user);
   }
 
-  async remove(id: number): Promise<User | undefined> {
+  async remove(id: number): Promise<UserResponse | undefined> {
     const user = await this.usersRepository.findOne({ where: { id } });
     if (!user) {
       throw new NotFoundException(`User with id[${id}] not found`);
     }
-    return await this.usersRepository.remove(user);
+    await this.usersRepository.remove(user);
+    return new UserResponse(user);
   }
 }

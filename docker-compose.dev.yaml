@@ -8,6 +8,7 @@ services:
       context: .
       dockerfile: Dockerfile.dev
     container_name: siema-tech-backend-service
+    restart: always
     ports:
       - "3000:3000"
     env_file:

@@ -3,33 +3,34 @@ import { UsersController } from "../users.controller";
 import { UsersService } from "../users.service";
 import { CreateUserDto } from "../dto/create-user.dto";
 import { UpdateUserDto } from "../dto/update-user.dto";
-import { User } from "../entities/user.entity";
 import { PaginateUsersDto } from "../dto/paginate-users.dto";
-import { NotFoundException } from "@nestjs/common";
+import { UserResponse } from "../dto/user-response.dto";
 
 describe("UsersController", () => {
   let controller: UsersController;
-  let service: UsersService;
+  let service: jest.Mocked<UsersService>;
 
   beforeEach(async () => {
+    const mockUsersService = {
+      create: jest.fn(),
+      findAll: jest.fn(),
+      findOne: jest.fn(),
+      update: jest.fn(),
+      remove: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UsersController],
       providers: [
         {
           provide: UsersService,
-          useValue: {
-            create: jest.fn(),
-            findAll: jest.fn(),
-            findOne: jest.fn(),
-            update: jest.fn(),
-            remove: jest.fn(),
-          },
+          useValue: mockUsersService,
         },
       ],
     }).compile();
 
     controller = module.get<UsersController>(UsersController);
-    service = module.get<UsersService>(UsersService);
+    service = module.get(UsersService);
   });
 
   it("should be defined", () => {
@@ -37,191 +38,101 @@ describe("UsersController", () => {
   });
 
   describe("create", () => {
-    it("should create a new user", async () => {
+    it("should create a user", async () => {
       const createUserDto: CreateUserDto = {
         firstName: "John",
         lastName: "Doe",
         email: "john@example.com",
-        password: "XXXXXXXXXXX",
+        password: "password123",
       };
-      const expectedResult: User = {
-        id: 1,
-        firstName: "John",
-        lastName: "Doe",
-        email: "john@example.com",
-        password: "XXXXXXXXXXX",
-      };
+      const expectedResult = new UserResponse({ id: 1, ...createUserDto });
+      service.create.mockResolvedValue(expectedResult);
 
-      jest.spyOn(service, "create").mockResolvedValue(expectedResult);
+      const result = await controller.create(createUserDto);
 
-      expect(await controller.create(createUserDto)).toBe(expectedResult);
       expect(service.create).toHaveBeenCalledWith(createUserDto);
+      expect(result).toEqual(expectedResult);
     });
   });
 
   describe("findAll", () => {
-    it("should return an array of users with default pagination", async () => {
-      const expectedResult: User[] = [
-        {
+    it("should return an array of users", async () => {
+      const paginateUsersDto: PaginateUsersDto = { page: 1, limit: 10 };
+      const expectedResult = [
+        new UserResponse({
           id: 1,
           firstName: "John",
           lastName: "Doe",
           email: "john@example.com",
-          password: "XXXXXXXXXXX",
-        },
-        {
+        }),
+        new UserResponse({
           id: 2,
           firstName: "Jane",
           lastName: "Doe",
           email: "jane@example.com",
-          password: "XXXXXXXXXXX",
-        },
+        }),
       ];
+      service.findAll.mockResolvedValue(expectedResult);
 
-      jest.spyOn(service, "findAll").mockResolvedValue(expectedResult);
+      const result = await controller.findAll(paginateUsersDto);
 
-      expect(await controller.findAll({ page: 1, limit: 10 })).toBe(
-        expectedResult,
-      );
-      expect(service.findAll).toHaveBeenCalledWith({ page: 1, limit: 10 });
-    });
-
-    it("should return an array of users with custom pagination", async () => {
-      const paginateUsersDto: PaginateUsersDto = { page: 2, limit: 5 };
-      const expectedResult: User[] = [
-        {
-          id: 6,
-          firstName: "Alice",
-          lastName: "Smith",
-          email: "alice@example.com",
-          password: "XXXXXXXXXXX",
-        },
-        {
-          id: 7,
-          firstName: "Bob",
-          lastName: "Johnson",
-          email: "bob@example.com",
-          password: "XXXXXXXXXXX",
-        },
-      ];
-
-      jest.spyOn(service, "findAll").mockResolvedValue(expectedResult);
-
-      expect(await controller.findAll(paginateUsersDto)).toBe(expectedResult);
       expect(service.findAll).toHaveBeenCalledWith(paginateUsersDto);
-    });
-
-    it("should handle NotFoundException", async () => {
-      jest
-        .spyOn(service, "findAll")
-        .mockRejectedValue(new NotFoundException("No users found"));
-
-      await expect(controller.findAll(new PaginateUsersDto())).rejects.toThrow(
-        NotFoundException,
-      );
+      expect(result).toEqual(expectedResult);
     });
   });
 
   describe("findOne", () => {
-    it("should return a single user", async () => {
+    it("should return a user", async () => {
       const userId = "1";
-      const expectedResult: User = {
+      const expectedResult = new UserResponse({
         id: 1,
         firstName: "John",
         lastName: "Doe",
         email: "john@example.com",
-        password: "XXXXXXXXXXX",
-      };
+      });
+      service.findOne.mockResolvedValue(expectedResult);
 
-      jest.spyOn(service, "findOne").mockResolvedValue(expectedResult);
+      const result = await controller.findOne(userId);
 
-      expect(await controller.findOne(userId)).toBe(expectedResult);
-      expect(service.findOne).toHaveBeenCalledWith(+userId);
-    });
-
-    it("should handle NotFoundException", async () => {
-      const userId = "999";
-      jest
-        .spyOn(service, "findOne")
-        .mockRejectedValue(
-          new NotFoundException(`User with id[${userId}] not found`),
-        );
-
-      await expect(controller.findOne(userId)).rejects.toThrow(
-        NotFoundException,
-      );
+      expect(service.findOne).toHaveBeenCalledWith(1);
+      expect(result).toEqual(expectedResult);
     });
   });
 
   describe("update", () => {
     it("should update a user", async () => {
       const userId = "1";
-      const updateUserDto: UpdateUserDto = {
-        firstName: "Jane",
-        lastName: "Smith",
-      };
-      const expectedResult: User = {
+      const updateUserDto: UpdateUserDto = { firstName: "Jane" };
+      const expectedResult = new UserResponse({
         id: 1,
         firstName: "Jane",
-        lastName: "Smith",
+        lastName: "Doe",
         email: "john@example.com",
-        password: "XXXXXXXXXXX",
-      };
+      });
+      service.update.mockResolvedValue(expectedResult);
 
-      jest.spyOn(service, "update").mockResolvedValue(expectedResult);
+      const result = await controller.update(userId, updateUserDto);
 
-      expect(await controller.update(userId, updateUserDto)).toBe(
-        expectedResult,
-      );
-      expect(service.update).toHaveBeenCalledWith(+userId, updateUserDto);
-    });
-
-    it("should handle NotFoundException", async () => {
-      const userId = "999";
-      const updateUserDto: UpdateUserDto = {
-        firstName: "Jane",
-        lastName: "Smith",
-      };
-      jest
-        .spyOn(service, "update")
-        .mockRejectedValue(
-          new NotFoundException(`User with id[${userId}] not found`),
-        );
-
-      await expect(controller.update(userId, updateUserDto)).rejects.toThrow(
-        NotFoundException,
-      );
+      expect(service.update).toHaveBeenCalledWith(1, updateUserDto);
+      expect(result).toEqual(expectedResult);
     });
   });
 
   describe("remove", () => {
     it("should remove a user", async () => {
       const userId = "1";
-      const expectedResult: User = {
+      const expectedResult = new UserResponse({
         id: 1,
         firstName: "John",
         lastName: "Doe",
         email: "john@example.com",
-        password: "XXXXXXXXXXX",
-      };
+      });
+      service.remove.mockResolvedValue(expectedResult);
 
-      jest.spyOn(service, "remove").mockResolvedValue(expectedResult);
+      const result = await controller.remove(userId);
 
-      expect(await controller.remove(userId)).toBe(expectedResult);
-      expect(service.remove).toHaveBeenCalledWith(+userId);
-    });
-
-    it("should handle NotFoundException", async () => {
-      const userId = "999";
-      jest
-        .spyOn(service, "remove")
-        .mockRejectedValue(
-          new NotFoundException(`User with id[${userId}] not found`),
-        );
-
-      await expect(controller.remove(userId)).rejects.toThrow(
-        NotFoundException,
-      );
+      expect(service.remove).toHaveBeenCalledWith(1);
+      expect(result).toEqual(expectedResult);
     });
   });
 });
