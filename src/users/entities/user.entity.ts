@@ -3,10 +3,13 @@ import {
   BeforeUpdate,
   Column,
   Entity,
+  JoinTable,
+  ManyToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
 import * as bcrypt from "bcrypt";
 import { Exclude, Expose } from "class-transformer";
+import { Permission } from "src/permissions/entities/permission.entity";
 
 @Entity()
 export class User {
@@ -29,6 +32,10 @@ export class User {
   @Exclude()
   @Column("text")
   password: string;
+
+  @ManyToMany(() => Permission, (permission) => permission.user)
+  @JoinTable()
+  permissions: Permission[];
 
   @BeforeInsert()
   @BeforeUpdate()
