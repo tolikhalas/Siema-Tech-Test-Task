@@ -45,7 +45,7 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException(`User with id[${id}] not found`);
     }
-    return new UserResponse(user);
+    return plainToClass(UserResponse, user, { excludeExtraneousValues: true });
   }
 
   async update(
@@ -58,7 +58,7 @@ export class UsersService {
     }
     const updatedUser = { ...user, ...updateUserDto };
     await this.usersRepository.save(updatedUser);
-    return new UserResponse(user);
+    return plainToClass(UserResponse, user, { excludeExtraneousValues: true });
   }
 
   async remove(id: number): Promise<UserResponse | undefined> {
@@ -67,7 +67,7 @@ export class UsersService {
       throw new NotFoundException(`User with id[${id}] not found`);
     }
     await this.usersRepository.remove(user);
-    return new UserResponse(user);
+    return plainToClass(UserResponse, user, { excludeExtraneousValues: true });
   }
 
   /* 
