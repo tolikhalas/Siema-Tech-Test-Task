@@ -1,66 +1,60 @@
 import { Test, TestingModule } from "@nestjs/testing";
-import { AuthModule } from "../auth.module";
 import { AuthService } from "../auth.service";
-import { AuthController } from "../auth.controller";
-import { JwtStrategy } from "../jwt.strategy";
-import { GoogleStrategy } from "../google.strategy";
-import { UsersModule } from "src/users/users.module";
-import { JwtModule } from "@nestjs/jwt";
-import { PassportModule } from "@nestjs/passport";
+import { JwtService } from "@nestjs/jwt";
+import { getRepositoryToken } from "@nestjs/typeorm";
+import { User } from "src/users/entities/user.entity";
 
 jest.mock("@nestjs/jwt", () => ({
-  JwtModule: {
-    register: jest.fn().mockReturnValue({}),
-  },
+  JwtService: jest.fn(() => JwtServiceMock),
 }));
 
-describe("AuthModule", () => {
-  let module: TestingModule;
+const JwtServiceMock = {
+  sign: jest.fn().mockReturnValue("mockedJwtToken"),
+  verify: jest.fn().mockReturnValue({ userId: "mockedUserId" }),
+};
+
+const RepositoryMock = {
+  findOne: jest.fn(),
+  save: jest.fn(),
+};
+
+describe("AuthService", () => {
+  let authService: AuthService;
 
   beforeEach(async () => {
-    process.env.JWT_SECRET = "test-secret";
-
-    module = await Test.createTestingModule({
-      imports: [AuthModule],
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        AuthService,
+        { provide: JwtService, useValue: JwtServiceMock },
+        { provide: getRepositoryToken(User), useValue: RepositoryMock },
+      ],
     }).compile();
+
+    authService = module.get<AuthService>(AuthService);
   });
 
   it("should be defined", () => {
-    expect(module).toBeDefined();
-  });
-
-  it("should have AuthService defined", () => {
-    const authService = module.get<AuthService>(AuthService);
     expect(authService).toBeDefined();
   });
 
-  it("should have AuthController defined", () => {
-    const authController = module.get<AuthController>(AuthController);
-    expect(authController).toBeDefined();
+  it("should validate user", async () => {
+    const mockUser = { id: 1, email: "test", passport: "123" };
+    RepositoryMock.findOne.mockResolvedValue(mockUser);
+
+    const result = await authService.validateUser("test", "password");
+    expect(result).toEqual(mockUser);
   });
 
-  it("should have JwtStrategy defined", () => {
-    const jwtStrategy = module.get<JwtStrategy>(JwtStrategy);
-    expect(jwtStrategy).toBeDefined();
-  });
-
-  it("should have GoogleStrategy defined", () => {
-    const googleStrategy = module.get<GoogleStrategy>(GoogleStrategy);
-    expect(googleStrategy).toBeDefined();
-  });
-
-  it("should import UsersModule", () => {
-    expect(AuthModule.imports).toContain(UsersModule);
-  });
-
-  it("should import PassportModule", () => {
-    expect(AuthModule.imports).toContain(PassportModule);
-  });
-
-  it("should import JwtModule with correct options", () => {
-    expect(JwtModule.register).toHaveBeenCalledWith({
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: "1h" },
-    });
+  it("should login user", async () => {
+    const mockUser: User = {
+      id: 1,
+      firstName: "John",
+      lastName: "Doe",
+      email: "test",
+      password: "123",
+      hashPassword: jest.fn(),
+    };
+    const result = await authService.login(mockUser);
+    expect(result).toEqual({ access_token: "mockedJwtToken" });
   });
 });
