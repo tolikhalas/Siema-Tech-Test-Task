@@ -36,7 +36,6 @@ export class AuthController {
 
   @Post("register")
   create(@Body() createUserDto: CreateUserDto) {
-    console.log("Received body: ", createUserDto);
     return this.authService.register(createUserDto);
   }
 
