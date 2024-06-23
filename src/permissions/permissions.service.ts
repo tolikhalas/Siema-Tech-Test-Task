@@ -1,26 +1,97 @@
-import { Injectable } from '@nestjs/common';
-import { CreatePermissionDto } from './dto/create-permission.dto';
-import { UpdatePermissionDto } from './dto/update-permission.dto';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { Permission } from "./entities/permission.entity";
+import { CreatePermissionDto } from "./dto/create-permission.dto";
+import { UpdatePermissionDto } from "./dto/update-permission.dto";
+import { AssignPermissionsDto } from "./dto/assign-permissions.dto";
+import { UsersService } from "src/users/users.service";
 
 @Injectable()
 export class PermissionsService {
-  create(createPermissionDto: CreatePermissionDto) {
-    return 'This action adds a new permission';
+  constructor(
+    @InjectRepository(Permission)
+    private readonly permissionRepository: Repository<Permission>,
+    private readonly usersService: UsersService,
+  ) {}
+
+  /* 
+    CRUD Permissions methods
+   */
+  async create(createPermissionDto: CreatePermissionDto): Promise<Permission> {
+    const permission = this.permissionRepository.create(createPermissionDto);
+    return await this.permissionRepository.save(permission);
   }
 
-  findAll() {
-    return `This action returns all permissions`;
+  async findAll(): Promise<Permission[]> {
+    return await this.permissionRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} permission`;
+  async findOne(id: number): Promise<Permission> {
+    const permission = await this.permissionRepository.findOne({
+      where: { id },
+    });
+    if (!permission) {
+      throw new NotFoundException(`Permission with id ${id} not found`);
+    }
+    return permission;
   }
 
-  update(id: number, updatePermissionDto: UpdatePermissionDto) {
-    return `This action updates a #${id} permission`;
+  async update(
+    id: number,
+    updatePermissionDto: UpdatePermissionDto,
+  ): Promise<Permission> {
+    const permission = await this.findOne(id);
+    Object.assign(permission, updatePermissionDto);
+    return await this.permissionRepository.save(permission);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} permission`;
+  async remove(id: number): Promise<void> {
+    const permission = await this.findOne(id);
+    await this.permissionRepository.remove(permission);
+  }
+
+  /* 
+    Helper methods
+   */
+  async findPermissionByName(name: string) {
+    return this.permissionRepository.findOne({ where: { name: name } });
+  }
+
+  /* 
+    Per User Permissions' methods
+   */
+
+  async assignPermissions(
+    userId: number,
+    assignPermissionsDto: AssignPermissionsDto,
+  ): Promise<Permission[]> {
+    const user = await this.usersService.findOne(userId);
+    assignPermissionsDto.permissionIds.forEach(async (id) => {
+      const permission = await this.findOne(id);
+      user.permissions.push(permission);
+    });
+
+    await this.usersService.update(userId, user);
+    return user.permissions;
+  }
+
+  async getUserPermissions(userId: number): Promise<Permission[]> {
+    const user = await this.usersService.findOne(userId);
+    return user.permissions;
+  }
+
+  async removeUserPermissions(
+    userId: number,
+    assignPermissionsDto: AssignPermissionsDto,
+  ): Promise<Permission[]> {
+    const user = await this.usersService.findOne(userId);
+    assignPermissionsDto.permissionIds.forEach(async (id) => {
+      const permission = await this.findOne(id);
+      user.permissions.filter((per) => per.name != permission.name);
+    });
+
+    await this.usersService.update(userId, user);
+    return user.permissions;
   }
 }
