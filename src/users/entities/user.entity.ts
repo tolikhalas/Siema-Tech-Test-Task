@@ -33,6 +33,7 @@ export class User {
   @Column("text")
   password: string;
 
+  @Expose()
   @ManyToMany(() => Permission, (permission) => permission.user)
   @JoinTable()
   permissions: Permission[];
