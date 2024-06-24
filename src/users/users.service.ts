@@ -6,7 +6,7 @@ import { Repository } from "typeorm";
 import { User } from "./entities/user.entity";
 import { PaginateUsersDto } from "./dto/paginate-users.dto";
 import { UserResponse } from "./dto/user-response.dto";
-import { plainToClass } from "class-transformer";
+import { classToPlain, plainToClass } from "class-transformer";
 
 @Injectable()
 export class UsersService {
@@ -21,7 +21,7 @@ export class UsersService {
   async create(createUserDto: CreateUserDto): Promise<UserResponse> {
     const user = this.usersRepository.create(createUserDto);
     await this.usersRepository.save(user);
-    return new UserResponse(user);
+    return plainToClass(UserResponse, user, { excludeExtraneousValues: true});
   }
 
   async findAll(paginateUsersDto?: PaginateUsersDto): Promise<UserResponse[]> {

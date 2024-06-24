@@ -9,7 +9,10 @@ import typeormConfig from "./config/typeorm.config";
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot(typeormConfig),
+    TypeOrmModule.forRoot({
+      ...typeormConfig,
+      autoLoadEntities: true,
+    }),
     UsersModule,
     AuthModule,
     PermissionsModule,

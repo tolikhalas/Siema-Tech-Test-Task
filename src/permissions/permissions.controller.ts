@@ -8,38 +8,35 @@ import {
   Delete,
 } from "@nestjs/common";
 import { PermissionsService } from "./permissions.service";
-import { CreatePermissionDto } from "./dto/create-permission.dto";
-import { UpdatePermissionDto } from "./dto/update-permission.dto";
+import { AssignPermissionsDto } from "./dto/assign-permissions.dto";
 
 @Controller("users/:id/permissions")
 export class PermissionsController {
   constructor(private readonly permissionsService: PermissionsService) {}
 
   @Post()
-  create(@Body() createPermissionDto: CreatePermissionDto) {
-    return this.permissionsService.create(createPermissionDto);
+  @Patch()
+  assignPermissions(
+    @Param("id") id: string,
+    @Body() assignPermisionsDto: AssignPermissionsDto,
+  ) {
+    return this.permissionsService.assignPermissions(+id, assignPermisionsDto);
   }
 
   @Get()
-  findAll() {
-    return this.permissionsService.findAll();
+  getPermissions(@Param("id") id: string) {
+    console.log("Get permissions");
+    return this.permissionsService.getUserPermissions(+id);
   }
 
-  @Get(":id")
-  findOne(@Param("id") id: string) {
-    return this.permissionsService.findOne(+id);
-  }
-
-  @Patch(":id")
-  update(
+  @Delete()
+  findOne(
     @Param("id") id: string,
-    @Body() updatePermissionDto: UpdatePermissionDto,
+    @Body() assignPermisionsDto: AssignPermissionsDto,
   ) {
-    return this.permissionsService.update(+id, updatePermissionDto);
-  }
-
-  @Delete(":id")
-  remove(@Param("id") id: string) {
-    return this.permissionsService.remove(+id);
+    return this.permissionsService.removeUserPermissions(
+      +id,
+      assignPermisionsDto,
+    );
   }
 }
