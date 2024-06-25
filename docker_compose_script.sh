@@ -15,11 +15,11 @@ set -a
 if [ "$1" = "dev" ]; then
   # Load environment variables from .env.development.local file
   source .env.development.local
-  docker-compose -f docker-compose.yaml -f docker-compose.dev.yaml up
+  docker-compose -f docker-compose.dev.yaml up
 elif [ "$1" = "prod" ]; then
   # Load environment variables from .env.prod.local file
   source .env.prod.local
-  docker-compose -f docker-compose.yaml -f docker-compose.prod.yaml up
+  docker-compose -f docker-compose.prod.yaml up
 elif [ "$1" = "down" ]; then
   docker-compose down
 else

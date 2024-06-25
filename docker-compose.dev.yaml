@@ -1,19 +1,36 @@
+# Development docker-compose.yml
+# Depend on ```source YOUR_ENV_FILE```
 version: "3.8"
 
 services:
   backend:
     build:
+      context: .
       dockerfile: Dockerfile.dev
+    container_name: siema-tech-backend-service
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.development.local
     environment:
       NODE_ENV: development
     volumes:
       - .:/app
-    env_file:
-      - .env.development.local
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - siema-tech-network
 
   db:
+    image: postgres:alpine
+    container_name: siema-tech-db
+    volumes:
+      - /var/lib/postgresql/data:/var/lib/postgresql/data
     env_file:
       - .env.development.local
+    ports:
+      - 5432:5432
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 30s
@@ -22,3 +39,8 @@ services:
       start_period: 30s
     networks:
       - siema-tech-network
+
+networks:
+  siema-tech-network:
+    name: siema-tech-network
+    driver: bridge
