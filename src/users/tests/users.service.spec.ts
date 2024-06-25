@@ -143,13 +143,21 @@ describe("UsersService", () => {
         password: "hash1",
         hashPassword: jest.fn(),
       };
+
+      const expectedResponse: UserResponse = {
+        id: 1,
+        firstName: "John",
+        lastName: "Doe",
+        email: "john@example.com",
+      };
+
       repository.findOne.mockResolvedValue(user);
 
       const result = await service.findOne(1);
 
       expect(repository.findOne).toHaveBeenCalledWith({ where: { id: 1 } });
       expect(result).toBeInstanceOf(UserResponse);
-      expect(result).toEqual(new UserResponse(user));
+      expect(result).toEqual(expectedResponse);
     });
 
     it("should throw NotFoundException when user not found", async () => {

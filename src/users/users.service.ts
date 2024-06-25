@@ -6,6 +6,7 @@ import { Repository } from "typeorm";
 import { User } from "./entities/user.entity";
 import { PaginateUsersDto } from "./dto/paginate-users.dto";
 import { UserResponse } from "./dto/user-response.dto";
+import { plainToClass } from "class-transformer";
 
 @Injectable()
 export class UsersService {
@@ -14,6 +15,9 @@ export class UsersService {
     private readonly usersRepository: Repository<User>,
   ) {}
 
+  /* 
+    Users' CRUD Methods
+   */
   async create(createUserDto: CreateUserDto): Promise<UserResponse> {
     const user = this.usersRepository.create(createUserDto);
     await this.usersRepository.save(user);
@@ -31,7 +35,9 @@ export class UsersService {
     if (users.length === 0) {
       throw new NotFoundException("No users found");
     }
-    return users.map((user) => new UserResponse(user));
+    return users.map((user) =>
+      plainToClass(UserResponse, user, { excludeExtraneousValues: true }),
+    );
   }
 
   async findOne(id: number): Promise<UserResponse | undefined> {
@@ -39,7 +45,7 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException(`User with id[${id}] not found`);
     }
-    return new UserResponse(user);
+    return plainToClass(UserResponse, user, { excludeExtraneousValues: true });
   }
 
   async update(
@@ -52,7 +58,7 @@ export class UsersService {
     }
     const updatedUser = { ...user, ...updateUserDto };
     await this.usersRepository.save(updatedUser);
-    return new UserResponse(user);
+    return plainToClass(UserResponse, user, { excludeExtraneousValues: true });
   }
 
   async remove(id: number): Promise<UserResponse | undefined> {
@@ -61,6 +67,13 @@ export class UsersService {
       throw new NotFoundException(`User with id[${id}] not found`);
     }
     await this.usersRepository.remove(user);
-    return new UserResponse(user);
+    return plainToClass(UserResponse, user, { excludeExtraneousValues: true });
+  }
+
+  /* 
+    Additional Methods
+   */
+  async findOneByEmail(email: string) {
+    return await this.usersRepository.findOne({ where: { email: email } });
   }
 }
