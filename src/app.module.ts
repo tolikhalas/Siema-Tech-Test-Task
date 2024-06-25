@@ -28,6 +28,7 @@ export class AppModule {
   constructor(private readonly seedingService: SeedingService) {}
 
   async onModuleInit() {
+    await this.seedingService.seedUsers();
     await this.seedingService.seedPermissions();
   }
 }

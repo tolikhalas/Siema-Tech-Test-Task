@@ -19,7 +19,8 @@ export class UsersService {
     Users' CRUD Methods
    */
   async create(createUserDto: CreateUserDto): Promise<UserResponse> {
-    const user = this.usersRepository.create(createUserDto);
+    const user = await this.usersRepository.create(createUserDto);
+    await this.usersRepository.save(user);
     return plainToClass(UserResponse, user, { excludeExtraneousValues: true });
   }
 
