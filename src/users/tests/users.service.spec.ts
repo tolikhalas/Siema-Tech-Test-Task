@@ -54,6 +54,7 @@ describe("UsersService", () => {
         lastName: "Doe",
         email: "john@example.com",
         password: "password123",
+        permissions: [],
         hashPassword: jest.fn(),
       };
       repository.create.mockReturnValue(user);
@@ -77,6 +78,7 @@ describe("UsersService", () => {
           lastName: "Doe",
           email: "john@example.com",
           password: "hash1",
+          permissions: [],
           hashPassword: jest.fn(),
         },
         {
@@ -85,6 +87,7 @@ describe("UsersService", () => {
           lastName: "Doe",
           email: "jane@example.com",
           password: "hash2",
+          permissions: [],
           hashPassword: jest.fn(),
         },
       ];
@@ -107,6 +110,7 @@ describe("UsersService", () => {
           lastName: "Last6",
           email: "user6@example.com",
           password: "hash6",
+          permissions: [],
           hashPassword: jest.fn(),
         },
         {
@@ -115,6 +119,7 @@ describe("UsersService", () => {
           lastName: "Last7",
           email: "user7@example.com",
           password: "hash7",
+          permissions: [],
           hashPassword: jest.fn(),
         },
       ];
@@ -141,6 +146,7 @@ describe("UsersService", () => {
         lastName: "Doe",
         email: "john@example.com",
         password: "hash1",
+        permissions: [],
         hashPassword: jest.fn(),
       };
 
@@ -149,6 +155,7 @@ describe("UsersService", () => {
         firstName: "John",
         lastName: "Doe",
         email: "john@example.com",
+        permissions: [],
       };
 
       repository.findOne.mockResolvedValue(user);
@@ -176,6 +183,7 @@ describe("UsersService", () => {
         lastName: "Doe",
         email: "john@example.com",
         password: "hash1",
+        permissions: [],
         hashPassword: jest.fn(),
       };
       const updatedUser: User = {
@@ -209,6 +217,7 @@ describe("UsersService", () => {
         lastName: "Doe",
         email: "john@example.com",
         password: "hash1",
+        permissions: [],
         hashPassword: jest.fn(),
       };
       repository.findOne.mockResolvedValue(user);
