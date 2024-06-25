@@ -26,3 +26,6 @@ else
   echo "Usage: $0 {dev|prod|down}"
   exit 1
 fi
+
+# Run your post-configuration script
+./config/postconfig.sh

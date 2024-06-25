@@ -27,7 +27,7 @@ services:
     image: postgres:alpine
     container_name: siema-tech-db
     volumes:
-      - /var/lib/postgresql/data:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql/data
     env_file:
       - .env.development.local
     ports:
@@ -40,6 +40,9 @@ services:
       start_period: 30s
     networks:
       - siema-tech-network
+
+volumes:
+  db_data:
 
 networks:
   siema-tech-network:

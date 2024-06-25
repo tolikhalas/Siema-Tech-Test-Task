@@ -3,10 +3,13 @@ import {
   BeforeUpdate,
   Column,
   Entity,
+  JoinTable,
+  ManyToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
 import * as bcrypt from "bcrypt";
 import { Exclude, Expose } from "class-transformer";
+import { Permission } from "src/permissions/entities/permission.entity";
 
 @Entity()
 export class User {
@@ -30,9 +33,16 @@ export class User {
   @Column("text")
   password: string;
 
+  @Expose()
+  @ManyToMany(() => Permission, (permission) => permission.user)
+  @JoinTable()
+  permissions: Permission[];
+
+  @Exclude()
   @BeforeInsert()
   @BeforeUpdate()
   async hashPassword() {
-    this.password = await bcrypt.hash(this.password, 10);
+    const salt = await bcrypt.genSalt();
+    this.password = await bcrypt.hash(this.password, salt);
   }
 }
