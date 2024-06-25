@@ -12,9 +12,8 @@ import { SeedingService } from "./seeding/seeding.service";
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      ...typeormConfig,
-      autoLoadEntities: true,
+    TypeOrmModule.forRootAsync({
+      useFactory: async () => typeormConfig,
     }),
     UsersModule,
     AuthModule,
