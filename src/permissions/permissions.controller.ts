@@ -18,9 +18,9 @@ export class PermissionsController {
   @Patch()
   assignPermissions(
     @Param("id") id: string,
-    @Body() assignPermisionsDto: AssignPermissionsDto,
+    @Body() assignPermissionsDto: AssignPermissionsDto,
   ) {
-    return this.permissionsService.assignPermissions(+id, assignPermisionsDto);
+    return this.permissionsService.assignPermissions(+id, assignPermissionsDto);
   }
 
   @Get()

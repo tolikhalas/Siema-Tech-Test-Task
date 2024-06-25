@@ -55,7 +55,13 @@ export class PermissionsService {
     Helper methods
    */
   async findPermissionByName(name: string) {
-    return this.permissionRepository.findOne({ where: { name: name } });
+    const permission = await this.permissionRepository.findOne({
+      where: { name: name },
+    });
+    if (!permission) {
+      throw new NotFoundException(`There is no permission ${name}`);
+    }
+    return permission;
   }
 
   /* 
@@ -69,9 +75,10 @@ export class PermissionsService {
     const user = await this.usersService.findOne(userId);
     assignPermissionsDto.permissionIds.forEach(async (id) => {
       const permission = await this.findOne(id);
-      user.permissions.push(permission);
+      if (!user.permissions.includes(permission)) {
+        user.permissions.push(permission);
+      }
     });
-
     await this.usersService.update(userId, user);
     return user.permissions;
   }

@@ -20,7 +20,6 @@ export class UsersService {
    */
   async create(createUserDto: CreateUserDto): Promise<UserResponse> {
     const user = this.usersRepository.create(createUserDto);
-    await this.usersRepository.save(user);
     return plainToClass(UserResponse, user, { excludeExtraneousValues: true });
   }
 
@@ -31,6 +30,7 @@ export class UsersService {
     const users = await this.usersRepository.find({
       skip,
       take: limit,
+      relations: ["permissions"],
     });
     if (users.length === 0) {
       throw new NotFoundException("No users found");
@@ -41,7 +41,10 @@ export class UsersService {
   }
 
   async findOne(id: number): Promise<UserResponse | undefined> {
-    const user = await this.usersRepository.findOne({ where: { id } });
+    const user = await this.usersRepository.findOne({
+      where: { id },
+      relations: ["permissions"],
+    });
     if (!user) {
       throw new NotFoundException(`User with id[${id}] not found`);
     }
