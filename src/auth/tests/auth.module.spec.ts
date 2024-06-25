@@ -52,6 +52,7 @@ describe("AuthService", () => {
       lastName: "Doe",
       email: "test",
       password: "123",
+      permissions: [],
       hashPassword: jest.fn(),
     };
     const result = await authService.login(mockUser);
