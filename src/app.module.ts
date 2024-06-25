@@ -9,6 +9,7 @@ import { PermissionsModule } from "./permissions/permissions.module";
 import { SeedingModule } from "./seeding/seeding.module";
 import typeormConfig from "./config/typeorm.config";
 import { SeedingService } from "./seeding/seeding.service";
+import { TenantsModule } from "./tenants/tenants.module";
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { SeedingService } from "./seeding/seeding.service";
     AuthModule,
     PermissionsModule,
     SeedingModule,
+    TenantsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
