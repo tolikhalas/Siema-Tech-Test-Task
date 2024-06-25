@@ -169,17 +169,9 @@ describe("PermissionsService", () => {
         where: { name: "TEST_PERMISSION" },
       });
     });
-
-    it("should throw NotFoundException if permission is not found by name", async () => {
-      mockPermissionRepository.findOne.mockResolvedValue(null);
-
-      await expect(
-        service.findPermissionByName("NON_EXISTENT"),
-      ).rejects.toThrow(NotFoundException);
-    });
   });
 
-  describe("assignPermissions", () => {
+  describe("assignUserPermissions", () => {
     it("should assign permissions to a user", async () => {
       const userId = 1;
       const assignPermissionsDto: AssignPermissionsDto = {
@@ -196,7 +188,41 @@ describe("PermissionsService", () => {
         .mockResolvedValueOnce(permissions[0])
         .mockResolvedValueOnce(permissions[1]);
 
-      const result = await service.assignPermissions(
+      const result = await service.assignUserPermissions(
+        userId,
+        assignPermissionsDto,
+      );
+
+      expect(result).toEqual(permissions);
+      expect(mockUsersService.findOne).toHaveBeenCalledWith(userId);
+      expect(mockUsersService.update).toHaveBeenCalledWith(userId, {
+        ...user,
+        permissions,
+      });
+    });
+  });
+
+  describe("updateUserPermissions", () => {
+    it("should update permissions for a user", async () => {
+      const userId = 1;
+      const assignPermissionsDto: AssignPermissionsDto = {
+        permissionIds: [1, 2],
+      };
+      const user = {
+        id: userId,
+        permissions: [{ id: 1, name: "PERMISSION_1" }],
+      };
+      const permissions = [
+        { id: 1, name: "PERMISSION_1" },
+        { id: 2, name: "PERMISSION_2" },
+      ];
+
+      mockUsersService.findOne.mockResolvedValue(user);
+      mockPermissionRepository.findOne
+        .mockResolvedValueOnce(permissions[0])
+        .mockResolvedValueOnce(permissions[1]);
+
+      const result = await service.updateUserPermissions(
         userId,
         assignPermissionsDto,
       );

@@ -7,8 +7,9 @@ describe("PermissionsController", () => {
   let controller: PermissionsController;
 
   const mockPermissionsService = {
-    assignPermissions: jest.fn(),
+    assignUserPermissions: jest.fn(),
     getUserPermissions: jest.fn(),
+    updateUserPermissions: jest.fn(),
     removeUserPermissions: jest.fn(),
   };
 
@@ -36,13 +37,13 @@ describe("PermissionsController", () => {
       const assignPermissionsDto: AssignPermissionsDto = {
         permissionIds: [1, 2],
       };
-      const expectedPermissions = [
+      const permissions = [
         { id: 1, name: "PERMISSION_1" },
         { id: 2, name: "PERMISSION_2" },
       ];
 
-      mockPermissionsService.assignPermissions.mockResolvedValue(
-        expectedPermissions,
+      mockPermissionsService.assignUserPermissions.mockResolvedValue(
+        permissions,
       );
 
       const result = await controller.assignPermissions(
@@ -50,8 +51,8 @@ describe("PermissionsController", () => {
         assignPermissionsDto,
       );
 
-      expect(result).toEqual(expectedPermissions);
-      expect(mockPermissionsService.assignPermissions).toHaveBeenCalledWith(
+      expect(result).toEqual(permissions);
+      expect(mockPermissionsService.assignUserPermissions).toHaveBeenCalledWith(
         +userId,
         assignPermissionsDto,
       );
@@ -59,39 +60,65 @@ describe("PermissionsController", () => {
   });
 
   describe("getPermissions", () => {
-    it("should get permissions for a user", async () => {
+    it("should return permissions for a user", async () => {
       const userId = "1";
-      const expectedPermissions = [
+      const permissions = [
         { id: 1, name: "PERMISSION_1" },
         { id: 2, name: "PERMISSION_2" },
       ];
 
-      mockPermissionsService.getUserPermissions.mockResolvedValue(
-        expectedPermissions,
-      );
+      mockPermissionsService.getUserPermissions.mockResolvedValue(permissions);
 
       const result = await controller.getPermissions(userId);
 
-      expect(result).toEqual(expectedPermissions);
+      expect(result).toEqual(permissions);
       expect(mockPermissionsService.getUserPermissions).toHaveBeenCalledWith(
         +userId,
       );
     });
   });
 
-  describe("removePermissions", () => {
+  describe("updatePermissions", () => {
+    it("should update permissions for a user", async () => {
+      const userId = "1";
+      const assignPermissionsDto: AssignPermissionsDto = {
+        permissionIds: [1, 2],
+      };
+      const updatedPermissions = [
+        { id: 1, name: "PERMISSION_1" },
+        { id: 2, name: "PERMISSION_2" },
+      ];
+
+      mockPermissionsService.updateUserPermissions.mockResolvedValue(
+        updatedPermissions,
+      );
+
+      const result = await controller.updatePermissions(
+        userId,
+        assignPermissionsDto,
+      );
+
+      expect(result).toEqual(updatedPermissions);
+      expect(mockPermissionsService.updateUserPermissions).toHaveBeenCalledWith(
+        +userId,
+        assignPermissionsDto,
+      );
+    });
+  });
+
+  describe("removeUserPermissions", () => {
     it("should remove permissions from a user", async () => {
       const userId = "1";
       const assignPermissionsDto: AssignPermissionsDto = { permissionIds: [1] };
-      const expectedPermissions = [{ id: 2, name: "PERMISSION_2" }];
+      const remainingPermissions = [{ id: 2, name: "PERMISSION_2" }];
 
       mockPermissionsService.removeUserPermissions.mockResolvedValue(
-        expectedPermissions,
+        remainingPermissions,
       );
 
       const result = await controller.findOne(userId, assignPermissionsDto);
 
-      expect(result).toEqual(expectedPermissions);
+      expect(result).toEqual(remainingPermissions);
       expect(mockPermissionsService.removeUserPermissions).toHaveBeenCalledWith(
         +userId,
         assignPermissionsDto,

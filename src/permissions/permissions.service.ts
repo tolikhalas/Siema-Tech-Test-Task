@@ -54,13 +54,10 @@ export class PermissionsService {
   /* 
     Helper methods
    */
-  async findPermissionByName(name: string) {
+  async findPermissionByName(name: string): Promise<Permission> {
     const permission = await this.permissionRepository.findOne({
       where: { name: name },
     });
-    if (!permission) {
-      throw new NotFoundException(`There is no permission ${name}`);
-    }
     return permission;
   }
 
@@ -68,7 +65,7 @@ export class PermissionsService {
     Per User Permissions' methods
    */
 
-  async assignPermissions(
+  async assignUserPermissions(
     userId: number,
     assignPermissionsDto: AssignPermissionsDto,
   ): Promise<Permission[]> {
@@ -83,6 +80,21 @@ export class PermissionsService {
         (permission) => !user.permissions.some((p) => p.id === permission.id),
       ),
     ];
+
+    await this.usersService.update(userId, user);
+    return user.permissions;
+  }
+
+  async updateUserPermissions(
+    userId: number,
+    assignPermissionsDto: AssignPermissionsDto,
+  ): Promise<Permission[]> {
+    const user = await this.usersService.findOne(userId);
+    const permissionsToAssign = await Promise.all(
+      assignPermissionsDto.permissionIds.map((id) => this.findOne(id)),
+    );
+
+    user.permissions = [...permissionsToAssign];
 
     await this.usersService.update(userId, user);
     return user.permissions;

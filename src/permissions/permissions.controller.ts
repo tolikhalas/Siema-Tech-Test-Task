@@ -15,18 +15,30 @@ export class PermissionsController {
   constructor(private readonly permissionsService: PermissionsService) {}
 
   @Post()
-  @Patch()
   assignPermissions(
     @Param("id") id: string,
     @Body() assignPermissionsDto: AssignPermissionsDto,
   ) {
-    return this.permissionsService.assignPermissions(+id, assignPermissionsDto);
+    return this.permissionsService.assignUserPermissions(
+      +id,
+      assignPermissionsDto,
+    );
   }
 
   @Get()
   getPermissions(@Param("id") id: string) {
-    console.log("Get permissions");
     return this.permissionsService.getUserPermissions(+id);
+  }
+
+  @Patch()
+  updatePermissions(
+    @Param("id") id: string,
+    @Body() assignPermissionsDto: AssignPermissionsDto,
+  ) {
+    return this.permissionsService.updateUserPermissions(
+      +id,
+      assignPermissionsDto,
+    );
   }
 
   @Delete()
