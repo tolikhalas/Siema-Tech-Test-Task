@@ -3,7 +3,7 @@ import { TenantsService } from "./tenants.service";
 import { TenantsController } from "./tenants.controller";
 import { TenantsMiddleware } from "./tenants.middleware";
 import { TenantConnectionProvider } from "src/providers/tenant-connection.provider";
-import { TenantRepositoryProvider } from "src/providers/tenant-repository.provicer";
+import { TenantRepositoryProvider } from "src/providers/tenant-repository.provider";
 
 @Module({
   controllers: [TenantsController],
