@@ -1,4 +1,10 @@
-import { Column, Entity, PrimaryGeneratedColumn, Timestamp } from "typeorm";
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from "typeorm";
 
 @Entity()
 export class Tenant {
@@ -14,9 +20,9 @@ export class Tenant {
   @Column({ nullable: true })
   description: string;
 
-  @Column()
-  createdAt: Timestamp;
+  @CreateDateColumn()
+  createdAt: Date;
 
-  @Column()
-  updatedAt: Timestamp;
+  @UpdateDateColumn()
+  updatedAt: Date;
 }
