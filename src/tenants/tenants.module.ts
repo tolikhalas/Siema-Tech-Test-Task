@@ -3,10 +3,16 @@ import { TenantsService } from "./tenants.service";
 import { TenantsController } from "./tenants.controller";
 import { TenantsMiddleware } from "./tenants.middleware";
 import { TenantConnectionProvider } from "src/providers/tenant-connection.provider";
+import { TenantRepositoryProvider } from "src/providers/tenant-repository.provicer";
 
 @Module({
   controllers: [TenantsController],
-  providers: [TenantsService, TenantConnectionProvider],
+  providers: [
+    TenantsService,
+    TenantConnectionProvider,
+    TenantRepositoryProvider,
+  ],
+  exports: [TenantConnectionProvider],
 })
 export class TenantsModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

@@ -3,6 +3,7 @@ import { getDataSourceToken } from "@nestjs/typeorm";
 import { DataSource, DataSourceOptions } from "typeorm";
 import typeormConfig from "src/config/typeorm.config";
 import { InternalServerErrorException, Scope } from "@nestjs/common";
+import { Tenant } from "src/tenants/entities/tenant.entity";
 
 export const TenantConnectionProvider = {
   provide: "TENANT_CONNECTION",
@@ -21,6 +22,7 @@ export const TenantConnectionProvider = {
       const options = {
         ...typeormConfig,
         database: databaseName,
+        entities: [Tenant],
       } as DataSourceOptions;
 
       const dataSource = new DataSource(options);
