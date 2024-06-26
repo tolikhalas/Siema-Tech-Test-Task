@@ -1,15 +1,22 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { CreateTenantDto } from "./dto/create-tenant.dto";
 import { UpdateTenantDto } from "./dto/update-tenant.dto";
+import { DataSource } from "typeorm";
+import { TenantConnectionProvider } from "src/providers/tenant-connection.provider";
 
 @Injectable()
 export class TenantsService {
+  constructor(
+    @Inject(TenantConnectionProvider.provide)
+    private readonly dataSource: DataSource,
+  ) {}
+
   create(createTenantDto: CreateTenantDto) {
     return "This action adds a new tenant";
   }
 
   findAll() {
-    return `This action returns all tenants`;
+    return this.dataSource.options.database as string;
   }
 
   findOne(id: number) {

@@ -4,7 +4,7 @@ import { DataSource, DataSourceOptions } from "typeorm";
 import typeormConfig from "src/config/typeorm.config";
 import { InternalServerErrorException, Scope } from "@nestjs/common";
 
-export const tenantConnectionProvider = {
+export const TenantConnectionProvider = {
   provide: "TENANT_CONNECTION",
   useFactory: async (request, connection: DataSource) => {
     const databaseName = `tenant_${request.tenantId}`;
@@ -35,9 +35,16 @@ export const tenantConnectionProvider = {
 
 async function createDatabase(dbName: string, connection: DataSource) {
   try {
-    await connection.query(`
-        SELECT 'CREATE DATABASE ${dbName}'
-        WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '${dbName}')\gexec`);
+    const dbExists = await connection.query(
+      `
+      SELECT 1 FROM pg_database WHERE datname = $1
+    `,
+      [dbName],
+    );
+
+    if (dbExists.length === 0) {
+      await connection.query(`CREATE DATABASE "${dbName}"`);
+    }
   } catch (error) {
     console.log(error);
   }
