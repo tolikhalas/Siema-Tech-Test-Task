@@ -9,17 +9,18 @@ import { PermissionsModule } from "./permissions/permissions.module";
 import { SeedingModule } from "./seeding/seeding.module";
 import typeormConfig from "./config/typeorm.config";
 import { SeedingService } from "./seeding/seeding.service";
+import { TenantsModule } from "./tenants/tenants.module";
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      ...typeormConfig,
-      autoLoadEntities: true,
+    TypeOrmModule.forRootAsync({
+      useFactory: async () => typeormConfig,
     }),
     UsersModule,
     AuthModule,
     PermissionsModule,
     SeedingModule,
+    TenantsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
