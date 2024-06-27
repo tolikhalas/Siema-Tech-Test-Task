@@ -22,13 +22,12 @@ export class SeedingService {
 
   async seedPermissions() {
     for (const permission of permissions) {
-      try {
-        const existingPermission =
-          await this.permissionService.findPermissionByName(permission.name);
-        if (!existingPermission) {
-          await this.permissionService.create(permission);
-        }
-      } catch (error) {}
+      const existingPermission =
+        await this.permissionService.findPermissionByName(permission.name);
+      console.log(existingPermission);
+      if (!existingPermission) {
+        await this.permissionService.create(permission);
+      }
     }
   }
 }
