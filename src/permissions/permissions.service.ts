@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Permission } from "./entities/permission.entity";
@@ -6,6 +6,8 @@ import { CreatePermissionDto } from "./dto/create-permission.dto";
 import { UpdatePermissionDto } from "./dto/update-permission.dto";
 import { AssignPermissionsDto } from "./dto/assign-permissions.dto";
 import { UsersService } from "src/users/users.service";
+import { WINSTON_MODULE_PROVIDER } from "nest-winston";
+import { Logger } from "winston";
 
 @Injectable()
 export class PermissionsService {
@@ -13,6 +15,7 @@ export class PermissionsService {
     @InjectRepository(Permission)
     private readonly permissionRepository: Repository<Permission>,
     private readonly usersService: UsersService,
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {}
 
   /* 
@@ -20,6 +23,12 @@ export class PermissionsService {
    */
   async create(createPermissionDto: CreatePermissionDto): Promise<Permission> {
     const permission = this.permissionRepository.create(createPermissionDto);
+
+    this.logger.log(
+      `Creating permission with name: ${permission.name}`,
+      permission,
+    );
+
     return await this.permissionRepository.save(permission);
   }
 
@@ -43,11 +52,23 @@ export class PermissionsService {
   ): Promise<Permission> {
     const permission = await this.findOne(id);
     Object.assign(permission, updatePermissionDto);
+
+    this.logger.log(
+      `Updating permission with id: ${permission.id}`,
+      permission,
+    );
+
     return await this.permissionRepository.save(permission);
   }
 
   async remove(id: number): Promise<void> {
     const permission = await this.findOne(id);
+
+    this.logger.log(
+      `Removing permission with id: ${permission.id}`,
+      permission,
+    );
+
     await this.permissionRepository.remove(permission);
   }
 
@@ -82,6 +103,12 @@ export class PermissionsService {
     ];
 
     await this.usersService.update(userId, user);
+
+    this.logger.log(
+      `Assigning permissions ${permissionsToAssign.join(", ")} to user with id: ${user.id}`,
+      user.permissions,
+    );
+
     return user.permissions;
   }
 
@@ -97,6 +124,12 @@ export class PermissionsService {
     user.permissions = [...permissionsToAssign];
 
     await this.usersService.update(userId, user);
+
+    this.logger.log(
+      `Updating permissions ${permissionsToAssign.join(", ")} for user with id: ${user.id}`,
+      user.permissions,
+    );
+
     return user.permissions;
   }
 
@@ -119,6 +152,12 @@ export class PermissionsService {
     );
 
     await this.usersService.update(userId, user);
+
+    this.logger.log(
+      `Removing permissions ${permissionsToRemove.join(", ")} from user with id: ${user.id}`,
+      user.permissions,
+    );
+
     return user.permissions;
   }
 }
