@@ -12,6 +12,8 @@ import { SeedingService } from "./seeding/seeding.service";
 import { TenantsModule } from "./tenants/tenants.module";
 import { APP_GUARD } from "@nestjs/core";
 import { JwtAuthGuard } from "./auth/jwt-auth.guard";
+import { WinstonModule } from "nest-winston";
+import { winstonConfig } from "./config/logger.config";
 
 @Module({
   imports: [
@@ -23,12 +25,16 @@ import { JwtAuthGuard } from "./auth/jwt-auth.guard";
     PermissionsModule,
     SeedingModule,
     TenantsModule,
+    WinstonModule.forRoot(winstonConfig),
   ],
   controllers: [AppController],
-  providers: [AppService, {
-    provide: APP_GUARD,
-    useClass: JwtAuthGuard
-  }],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule {
   constructor(private readonly seedingService: SeedingService) {}

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -7,20 +7,29 @@ import { User } from "./entities/user.entity";
 import { PaginateUsersDto } from "./dto/paginate-users.dto";
 import { UserResponse } from "./dto/user-response.dto";
 import { plainToClass } from "class-transformer";
+import { WINSTON_MODULE_PROVIDER } from "nest-winston";
+import { Logger } from "winston";
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {}
 
   /* 
     Users' CRUD Methods
    */
   async create(createUserDto: CreateUserDto): Promise<UserResponse> {
-    const user = await this.usersRepository.create(createUserDto);
+    const user = this.usersRepository.create(createUserDto);
     await this.usersRepository.save(user);
+
+    this.logger.info(`User created with id[${user.id}]`, {
+      ...user,
+      password: undefined,
+    });
+
     return plainToClass(UserResponse, user, { excludeExtraneousValues: true });
   }
 
@@ -62,6 +71,12 @@ export class UsersService {
     }
     const updatedUser = { ...user, ...updateUserDto };
     await this.usersRepository.save(updatedUser);
+
+    this.logger.info(`User updated with id[${user.id}]`, {
+      ...updatedUser,
+      password: undefined,
+    });
+
     return plainToClass(UserResponse, user, { excludeExtraneousValues: true });
   }
 
@@ -70,6 +85,12 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException(`User with id[${id}] not found`);
     }
+
+    this.logger.log("info", `User deleted with id[${user.id}]`, {
+      ...user,
+      password: undefined,
+    });
+
     await this.usersRepository.remove(user);
     return plainToClass(UserResponse, user, { excludeExtraneousValues: true });
   }
