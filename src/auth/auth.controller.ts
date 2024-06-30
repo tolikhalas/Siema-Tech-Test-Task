@@ -13,7 +13,9 @@ import { CreateUserDto } from "src/users/dto/create-user.dto";
 import { AuthService } from "./auth.service";
 import { NotFoundFilter } from "src/filters/not-found.filter";
 import { AuthGuard } from "@nestjs/passport";
+import { Public } from "./public.decorator";
 
+@Public()
 @UseFilters(NotFoundFilter)
 @Controller("auth")
 export class AuthController {

@@ -10,6 +10,8 @@ import { SeedingModule } from "./seeding/seeding.module";
 import typeormConfig from "./config/typeorm.config";
 import { SeedingService } from "./seeding/seeding.service";
 import { TenantsModule } from "./tenants/tenants.module";
+import { APP_GUARD } from "@nestjs/core";
+import { JwtAuthGuard } from "./auth/jwt-auth.guard";
 
 @Module({
   imports: [
@@ -23,7 +25,10 @@ import { TenantsModule } from "./tenants/tenants.module";
     TenantsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, {
+    provide: APP_GUARD,
+    useClass: JwtAuthGuard
+  }],
 })
 export class AppModule {
   constructor(private readonly seedingService: SeedingService) {}
