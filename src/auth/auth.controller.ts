@@ -16,7 +16,6 @@ import { AuthGuard } from "@nestjs/passport";
 import { Public } from "./public.decorator";
 
 @Public()
-@UseFilters(NotFoundFilter)
 @Controller("auth")
 export class AuthController {
   constructor(private readonly authService: AuthService) {}

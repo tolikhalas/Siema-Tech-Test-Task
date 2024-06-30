@@ -6,6 +6,7 @@ import { UserFilteredTenantRepository } from "./filtered-tenant.repository";
 import { User } from "src/users/entities/user.entity";
 import { InternalServerErrorException } from "@nestjs/common";
 import { Logger } from "winston";
+import { WINSTON_MODULE_PROVIDER } from "nest-winston";
 
 export const TenantRepositoryProvider = {
   provide: "TENANT_REPOSITORY",
@@ -21,5 +22,5 @@ export const TenantRepositoryProvider = {
     }
     return new UserFilteredTenantRepository(connection, user as User);
   },
-  inject: [REQUEST, getDataSourceToken(), Logger],
+  inject: [REQUEST, getDataSourceToken(), WINSTON_MODULE_PROVIDER],
 };
