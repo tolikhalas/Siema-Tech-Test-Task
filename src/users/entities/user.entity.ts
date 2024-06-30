@@ -5,11 +5,13 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
 import * as bcrypt from "bcrypt";
 import { Exclude, Expose } from "class-transformer";
 import { Permission } from "src/permissions/entities/permission.entity";
+import { Tenant } from "src/tenants/entities/tenant.entity";
 
 @Entity()
 export class User {
@@ -37,6 +39,10 @@ export class User {
   @ManyToMany(() => Permission, (permission) => permission.user)
   @JoinTable()
   permissions: Permission[];
+
+  @Exclude()
+  @OneToMany(() => Tenant, (tenant) => tenant.user)
+  tenants: Tenant[];
 
   @Exclude()
   @BeforeInsert()

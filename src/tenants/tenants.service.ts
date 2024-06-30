@@ -3,6 +3,7 @@ import { CreateTenantDto } from "./dto/create-tenant.dto";
 import { UpdateTenantDto } from "./dto/update-tenant.dto";
 import { Repository } from "typeorm";
 import { Tenant } from "./entities/tenant.entity";
+import { plainToClass } from "class-transformer";
 
 @Injectable()
 export class TenantsService {
@@ -12,7 +13,8 @@ export class TenantsService {
   ) {}
 
   async create(createTenantDto: CreateTenantDto) {
-    return await this.tenantsRepository.save(createTenantDto);
+    const tenant = await this.tenantsRepository.save(createTenantDto);
+    return plainToClass(Tenant, tenant, { excludeExtraneousValues: true });
   }
 
   async findAll() {
