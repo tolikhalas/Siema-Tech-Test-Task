@@ -7,6 +7,8 @@ import { UsersModule } from "src/users/users.module";
 import { JwtModule } from "@nestjs/jwt";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { Tenant } from "./entities/tenant.entity";
+import { WinstonModule } from "nest-winston";
+import { winstonConfig } from "src/config/logger.config";
 
 @Module({
   imports: [
@@ -18,10 +20,7 @@ import { Tenant } from "./entities/tenant.entity";
     TypeOrmModule.forFeature([Tenant]),
   ],
   controllers: [TenantsController],
-  providers: [
-    TenantsService,
-    TenantRepositoryProvider,
-  ],
+  providers: [TenantsService, TenantRepositoryProvider],
 })
 export class TenantsModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

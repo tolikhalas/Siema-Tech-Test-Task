@@ -17,8 +17,6 @@ import { NotFoundFilter } from "src/filters/not-found.filter";
 import { PaginateUsersDto } from "./dto/paginate-users.dto";
 import { JwtAuthGuard } from "src/auth/jwt-auth.guard";
 
-@UseGuards(JwtAuthGuard)
-@UseFilters(NotFoundFilter)
 @Controller("users")
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
